@@ -8,7 +8,7 @@ from re import compile
 from aiohttp import ClientSession
 from asyncio import sleep
 
-discord_regex = compile("(?:discord.gg|discord.com|discord.net|discordapp.com|watchanimeattheoffice.com)/(\w+)")
+discord_regex = compile(")")
 allowed_discords = env["ALLOWED_DISCORDS"].split(" ")
 max_threshold = float(env["MAX_THRESHOLD"])
 ratelimited = []
@@ -16,13 +16,13 @@ ratelimited = []
 
 async def regex_check(client, message: MessageContext):
     for regex, regex_raw in client.banned_regexes:
-        if regex.match(message.content):
+        if regex.search(message.content):
             return True, f"Message matched regex: {regex_raw}"
     return False, None
 
 
 async def discord_invite_check(client, message: MessageContext):
-    match = discord_regex.match(message.content)
+    match = discord_regex.search(message.content)
     if match:
         code = match.group(0)
         if code in allowed_discords:
@@ -37,7 +37,7 @@ async def max_check(client, message: MessageContext):
         data = await r.json()
         predictions = data["results"][0]["predictions"]
         for prediction_name, prediction_value in predictions.items():
-            if prediction_name == "toxic":
+            if prediction_name in ["toxic", "obscene"]:
                 continue
             if prediction_value >= max_threshold:
                 return True, f"Predicted {prediction_name}. {round(prediction_value * 100)}% sure"
