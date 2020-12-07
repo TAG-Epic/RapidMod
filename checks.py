@@ -8,7 +8,7 @@ from re import compile
 from aiohttp import ClientSession
 from asyncio import sleep
 
-discord_regex = compile(")")
+discord_regex = compile(env["INVITE_REGEX"])
 allowed_discords = env["ALLOWED_DISCORDS"].split(" ")
 max_threshold = float(env["MAX_THRESHOLD"])
 ratelimited = []
